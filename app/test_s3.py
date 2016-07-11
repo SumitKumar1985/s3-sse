@@ -1,8 +1,11 @@
 import unittest
 import boto3
 import botocore
+import os
 
 BUCKET = 'km-sse-random137'
+KEY = 'baz'
+SSE_KEY = os.urandom(32)
 
 class TestS3(unittest.TestCase):
 
@@ -20,17 +23,28 @@ class TestS3(unittest.TestCase):
 
     def test_put_object_with_sse(self):
         client = boto3.client('s3')
-        response = client.get_bucket_location(
-            Bucket = BUCKET
+        client.put_object(
+            Bucket = BUCKET,
+            Key = KEY,
+            Body = b'foobar',
+            SSECustomerKey = SSE_KEY,
+            SSECustomerAlgorithm = 'AES256'
         )
-        self.assertEqual(None, response['LocationConstraint'])
+
+        response = client.get_object(
+            Bucket = BUCKET,
+            Key = KEY,
+            SSECustomerKey = SSE_KEY,
+            SSECustomerAlgorithm = 'AES256'
+        )
+        self.assertEqual('foobar', response['Body'].read())
 
 
     def tearDown(self):
-        client = boto3.client('s3')
-        client.delete_bucket(
-            Bucket = BUCKET
-        )
+        s3 = boto3.resource('s3')
+        bucket = s3.Bucket(BUCKET)
+        bucket.objects.delete()
+        bucket.delete()
 
 
 if __name__ == '__main__':
