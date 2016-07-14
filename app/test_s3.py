@@ -21,7 +21,7 @@ class TestS3(unittest.TestCase):
             )
 
 
-    def test_put_object_with_sse(self):
+    def test_put_object_with_s3_sse_c(self):
         client = boto3.client('s3')
         client.put_object(
             Bucket = BUCKET,
