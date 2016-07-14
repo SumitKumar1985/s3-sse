@@ -20,6 +20,21 @@ class TestS3(unittest.TestCase):
                 Bucket = BUCKET
             )
 
+    def test_put_object_with_s3_sse_s3(self):
+        client = boto3.client('s3')
+        client.put_object(
+            Bucket = BUCKET,
+            Key = 'fangorn',
+            Body = b'Treebeard',
+            ServerSideEncryption = 'AES256'
+        )
+
+        response = client.get_object(
+            Bucket = BUCKET,
+            Key = 'fangorn'
+        )
+        self.assertEqual('Treebeard', response['Body'].read())
+        
 
     def test_put_object_with_s3_sse_c(self):
         client = boto3.client('s3')
