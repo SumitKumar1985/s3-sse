@@ -4,7 +4,6 @@ import botocore
 import os
 
 BUCKET = 'km-sse-random137'
-KEY = 'baz'
 SSE_KEY = os.urandom(32)
 
 class TestS3(unittest.TestCase):
@@ -34,13 +33,13 @@ class TestS3(unittest.TestCase):
             Key = 'fangorn'
         )
         self.assertEqual('Treebeard', response['Body'].read())
-        
+
 
     def test_put_object_with_s3_sse_c(self):
         client = boto3.client('s3')
         client.put_object(
             Bucket = BUCKET,
-            Key = KEY,
+            Key = 'baz',
             Body = b'foobar',
             SSECustomerKey = SSE_KEY,
             SSECustomerAlgorithm = 'AES256'
@@ -48,7 +47,7 @@ class TestS3(unittest.TestCase):
 
         response = client.get_object(
             Bucket = BUCKET,
-            Key = KEY,
+            Key = 'baz',
             SSECustomerKey = SSE_KEY,
             SSECustomerAlgorithm = 'AES256'
         )
