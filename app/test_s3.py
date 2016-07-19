@@ -3,8 +3,10 @@ import boto3
 import botocore
 import os
 
+REGION = 'ap-south-1'
 BUCKET = 'km-sse-random137'
 SSE_KEY = os.urandom(32)
+
 
 class TestS3(unittest.TestCase):
 
@@ -12,11 +14,14 @@ class TestS3(unittest.TestCase):
         client = boto3.client('s3')
         try:
             client.head_bucket(
-                Bucket = BUCKET
+                Bucket = BUCKET,
             )
         except botocore.exceptions.ClientError as e:
             response = client.create_bucket(
-                Bucket = BUCKET
+                Bucket = BUCKET,
+                CreateBucketConfiguration = {
+                    'LocationConstraint': REGION
+                }
             )
 
     def test_put_object_with_s3_sse_s3(self):
@@ -33,6 +38,22 @@ class TestS3(unittest.TestCase):
             Key = 'fangorn'
         )
         self.assertEqual('Treebeard', response['Body'].read())
+
+
+    def test_put_object_with_s3_sse_kms(self):
+        client = boto3.client('s3')
+        response = client.put_object(
+            Bucket = BUCKET,
+            Key = 'yellow-jersey',
+            Body = b'Froome',
+            ServerSideEncryption = 'aws:kms'
+        )
+
+        response = client.get_object(
+            Bucket = BUCKET,
+            Key = 'yellow-jersey'
+        )
+        self.assertEqual('Froome', response['Body'].read())
 
 
     def test_put_object_with_s3_sse_c(self):
